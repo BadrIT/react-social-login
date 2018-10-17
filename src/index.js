@@ -164,6 +164,10 @@ const SocialLogin = (WrappedComponent) => class SocialLogin extends Component {
    * Triggers login process.
    */
   login () {
+    if (this.props.beforeLoginAction) {
+      this.props.beforeLoginAction()
+    }
+
     if (this.state.isLoaded && !this.state.isConnected && !this.state.isFetching) {
       this.setState((prevState) => ({
         ...prevState,
@@ -332,12 +336,12 @@ const SocialLogin = (WrappedComponent) => class SocialLogin extends Component {
       }
     }
 
-    return (<WrappedComponent triggerLogin={
-      this.login
-    } {...additionalProps
-    } {...originalProps
-    }
-    />
+    return (
+      <WrappedComponent
+        triggerLogin={this.login}
+        {...additionalProps}
+        {...originalProps}
+      />
     )
   }
 }
