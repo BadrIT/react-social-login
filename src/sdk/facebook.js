@@ -7,30 +7,31 @@ let facebookScopes = [
   'email'
 ]
 
-let facebookFields = [
-  'email',
-  'name',
-  'id',
-  'first_name',
-  'last_name',
-  'picture'
-]
-
 /**
  * Loads Facebook SDK.
  * @param {string} appId
  * @param {array|string} scope
- * @param {array|string} field
  * @see https://developers.facebook.com/docs/javascript/quickstart
  */
-const load = ({ appId, field, scope, version }) => new Promise((resolve) => {
+const load = ({ appId, scope, version }) => new Promise((resolve) => {
   // @TODO: handle errors
   if (document.getElementById('facebook-jssdk')) {
     return resolve()
   }
 
-  facebookScopes = handleInput(field, facebookScopes)
-  facebookFields = handleInput(field, facebookFields)
+  if (Array.isArray(scope)) {
+    facebookScopes = facebookScopes.concat(scope)
+  } else if (typeof scope === 'string' && scope) {
+    facebookScopes = facebookScopes.concat(scope.split(','))
+  }
+
+  facebookScopes = facebookScopes.reduce((acc, item) => {
+    if (typeof item === 'string' && acc.indexOf(item) === -1) {
+      acc.push(item.trim())
+    }
+
+    return acc
+  }, []).join(',')
 
   const firstJS = document.getElementsByTagName('script')[0]
   const js = document.createElement('script')
@@ -54,26 +55,6 @@ const load = ({ appId, field, scope, version }) => new Promise((resolve) => {
     firstJS.parentNode.appendChild(js)
   }
 })
-
-const handleInput = (input, defaultInput) => {
-  let result = ['default']
-
-  if (Array.isArray(input)) {
-    result = defaultInput.concat(input)
-  } else if (input && typeof input === 'string') {
-    result = defaultInput.concat(input.split(','))
-  }
-
-  result = result.reduce((acc, item) => {
-    if (typeof item === 'string' && acc && acc.indexOf && acc.indexOf(item) === -1) {
-      acc.add(item.trim())
-    }
-
-    return acc
-  }, new Set())
-
-  return [...result]
-}
 
 /**
  * Gets Facebook user profile if connected.
@@ -144,7 +125,7 @@ const logout = () => new Promise((resolve) => {
  */
 const getProfile = () => new Promise((resolve) => {
   window.FB.api('/me', 'GET', {
-    fields: facebookFields
+    fields: 'email,name,id,first_name,last_name,picture'
   }, resolve)
 })
 
@@ -152,20 +133,19 @@ const getProfile = () => new Promise((resolve) => {
  * Helper to generate user account data.
  * @param {Object} response
  */
-const generateUser = ({ accessToken, id, email, expiresIn, first_name, last_name, name, picture, userID, ...other }) => ({
+const generateUser = (response) => ({
   profile: {
-    id,
-    email,
-    name,
-    firstName: first_name,
-    lastName: last_name,
-    profilePicURL: picture.data.url
+    id: response.id,
+    name: response.name,
+    firstName: response.first_name,
+    lastName: response.last_name,
+    email: response.email,
+    profilePicURL: response.picture.data.url
   },
   token: {
-    accessToken,
-    expiresAt: timestampFromNow(expiresIn)
-  },
-  other
+    accessToken: response.accessToken,
+    expiresAt: timestampFromNow(response.expiresIn)
+  }
 })
 
 const oldLoad = (appId) => {
