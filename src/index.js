@@ -164,7 +164,9 @@ const SocialLogin = (WrappedComponent) => class SocialLogin extends Component {
    * Triggers login process.
    */
   login () {
+    console.log('this.props.beforeLoginAction', this.props.beforeLoginAction)
     if (this.props.beforeLoginAction) {
+      console.log('this.props.beforeLoginAction>>', this.props.beforeLoginAction)
       this.props.beforeLoginAction()
     }
 
