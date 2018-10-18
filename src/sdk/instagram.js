@@ -51,6 +51,8 @@ const load = ({ appId, redirect, scope }) => new Promise((resolve, reject) => {
     } else {
       instagramAccessToken = getHashValue('access_token')
     }
+  } else {
+    instagramAccessToken = getHashValue('access_token')
   }
 
   return resolve(instagramAccessToken)

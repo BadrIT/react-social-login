@@ -97,12 +97,12 @@ const SocialLogin = (WrappedComponent) => class SocialLogin extends Component {
       scope
     })
       .then((accessToken) => {
-        if (autoCleanUri) {
-          cleanLocation()
-        }
-
         if (accessToken) {
           this.accessToken = accessToken
+        }
+
+        if (autoCleanUri) {
+          cleanLocation()
         }
 
         this.setState((prevState) => ({
